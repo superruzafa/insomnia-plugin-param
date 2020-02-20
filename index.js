@@ -7,6 +7,7 @@ function getTypeFormat(typeFormat) {
 
 function getHtmlInputType(typeFormat) {
   const [type] = getTypeFormat(typeFormat);
+  if (typeFormat === 'string/password') return 'password';
   if (type === 'timestamp') return 'datetime-local';
   return 'text'
 }
@@ -38,6 +39,9 @@ module.exports.templateTags = [{
       displayName: 'String',
       value: 'string/raw'
     }, {
+      displayName: 'String - Password',
+      value: 'string/password'
+    }, {
       displayName: 'Timestamp - Unix',
       value: 'timestamp/unix'
     }, {
@@ -51,7 +55,7 @@ module.exports.templateTags = [{
 
   async run (context, name, typeFormat) {
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
-    const storageKey = `${context.meta.requestId}.${paramHash}`;
+    const storageKey = `${context.meta.requestId}.${paramHash}.${typeFormat}`;
     const storedValue = await context.store.getItem(storageKey);
     const title = name || 'Parameter';
     const inputType = getHtmlInputType(typeFormat);
@@ -60,7 +64,9 @@ module.exports.templateTags = [{
       inputType,
       selectText: true
     });
-    await context.store.setItem(storageKey, value);
+    if (typeFormat !== 'string/password') {
+      await context.store.setItem(storageKey, value);
+    }
     return formatValue(value, typeFormat);
   }
 }];
