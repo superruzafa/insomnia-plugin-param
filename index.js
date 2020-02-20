@@ -8,6 +8,7 @@ function getTypeFormat(typeFormat) {
 function getHtmlInputType(typeFormat) {
   const [type] = getTypeFormat(typeFormat);
   if (typeFormat === 'string/password') return 'password';
+  if (type === 'integer') return 'number';
   if (type === 'timestamp') return 'datetime-local';
   return 'text'
 }
@@ -19,6 +20,9 @@ function formatValue(value, typeFormat) {
     if (format === 'unix-ms') return dateFns.format(date, 'T');
     if (format === 'iso-8601') return dateFns.formatISO(date);
     return dateFns.format(date, 't');
+  }
+  if (type === 'integer') {
+    return parseInt(value);
   }
   return value;
 }
@@ -41,6 +45,9 @@ module.exports.templateTags = [{
     }, {
       displayName: 'String - Password',
       value: 'string/password'
+    }, {
+      displayName: 'Integer',
+      value: 'integer'
     }, {
       displayName: 'Timestamp - Unix',
       value: 'timestamp/unix'
