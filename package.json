@@ -1,0 +1,17 @@
+{
+  "name": "insomnia-plugin-param",
+  "version": "0.1.0",
+  "description": "An Insomnia plugin to ask for values for parameterized requests",
+  "main": "index.js",
+  "scripts": {
+    "test": "node --version"
+  },
+  "author": {
+    "name": "Alfonso Ruzafa",
+    "email": "superruzafa@gmail.com"
+  },
+  "license": "MIT",
+  "insomnia": {
+    "name": "param"
+  }
+}
