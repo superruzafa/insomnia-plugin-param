@@ -13,5 +13,8 @@
   "license": "MIT",
   "insomnia": {
     "name": "param"
+  },
+  "dependencies": {
+    "date-fns": "^2.9.0"
   }
 }

@@ -1,4 +1,26 @@
 const crypto = require('crypto');
+const dateFns = require('date-fns');
+
+function getTypeFormat(typeFormat) {
+  return typeFormat.split('/');
+}
+
+function getHtmlInputType(typeFormat) {
+  const [type] = getTypeFormat(typeFormat);
+  if (type === 'timestamp') return 'datetime-local';
+  return 'text'
+}
+
+function formatValue(value, typeFormat) {
+  const [type, format] = getTypeFormat(typeFormat);
+  if (type === 'timestamp') {
+    const date = dateFns.parseISO(value);
+    if (format === 'unix-ms') return dateFns.format(date, 'T');
+    if (format === 'iso-8601') return dateFns.formatISO(date);
+    return dateFns.format(date, 't');
+  }
+  return value;
+}
 
 module.exports.templateTags = [{
   name: 'param',
@@ -14,21 +36,31 @@ module.exports.templateTags = [{
     type: 'enum',
     options: [{
       displayName: 'String',
-      value: 'string'
+      value: 'string/raw'
+    }, {
+      displayName: 'Timestamp - Unix',
+      value: 'timestamp/unix'
+    }, {
+      displayName: 'Timestamp - Unix with milliseconds',
+      value: 'timestamp/unix-ms'
+    }, {
+      displayName: 'Timestamp - ISO-8601',
+      value: 'timestamp/iso-8601'
     }]
   }],
 
-  async run (context, name, type) {
+  async run (context, name, typeFormat) {
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
     const storageKey = `${context.meta.requestId}.${paramHash}`;
     const storedValue = await context.store.getItem(storageKey);
     const title = name || 'Parameter';
+    const inputType = getHtmlInputType(typeFormat);
     const value = await context.app.prompt(title, {
       defaultValue: storedValue || '',
-      inputType: 'text',
+      inputType,
       selectText: true
     });
     await context.store.setItem(storageKey, value);
-    return value;
+    return formatValue(value, typeFormat);
   }
 }];
