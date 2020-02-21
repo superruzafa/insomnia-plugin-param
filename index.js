@@ -6,12 +6,6 @@ module.exports.templateTags = [{
   displayName: 'Param',
   description: 'Ask for values for parameterized requests',
   args: [{
-    displayName: 'Name',
-    help: 'The name of the parameter.\n' +
-          'Optionally you can include a description with the purpose of this ' +
-          'parameter by using this format: <Name>: <description>',
-    type: 'string'
-  }, {
     displayName: 'Type',
     help: 'The type and format of the parameter',
     type: 'enum',
@@ -38,6 +32,12 @@ module.exports.templateTags = [{
       value: 'color/html'
     }]
   }, {
+    displayName: 'Name',
+    help: 'The name of the parameter.\n' +
+          'Optionally you can include a description with the purpose of this ' +
+          'parameter by using this format: "name: description"',
+    type: 'string'
+  }, {
     displayName: 'When to ask for a value',
     help: 'Controls when the asking dialog must be shown to the user',
     type: 'enum',
@@ -61,7 +61,7 @@ module.exports.templateTags = [{
     type: 'string'
   }],
 
-  async run (context, name, typeFormat, askBehavior, paramOpts) {
+  async run (context, typeFormat, name, askBehavior, paramOpts) {
     const [type] = util.getTypeFormat(typeFormat);
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
     const storageKey = `${context.meta.requestId}.${paramHash}.${type}`;
