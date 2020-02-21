@@ -10,6 +10,7 @@ function getHtmlInputType(typeFormat) {
   if (typeFormat === 'string/password') return 'password';
   if (type === 'integer') return 'number';
   if (type === 'timestamp') return 'datetime-local';
+  if (type === 'color') return 'color';
   return 'text'
 }
 
@@ -80,6 +81,9 @@ module.exports.templateTags = [{
     }, {
       displayName: 'Timestamp - ISO-8601',
       value: 'timestamp/iso-8601'
+    }, {
+      displayName: 'Color - HTML',
+      value: 'color/html'
     }]
   }],
 
