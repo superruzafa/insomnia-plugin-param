@@ -1,6 +1,6 @@
 # insomnia-plugin-param
 
-An [Insomnia] plugin to ask values to the user when making parameterized requests.
+An [Insomnia] plugin to ask values to the user when making requests.
 
 This plugin works much like the Insomnia's built-in Prompt plugin but adds some
 unique features, like asking for specific data type values or formatting those
