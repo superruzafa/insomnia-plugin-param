@@ -1,53 +1,5 @@
 const crypto = require('crypto');
-const dateFns = require('date-fns');
-
-function getTypeFormat(typeFormat) {
-  return typeFormat.split('/');
-}
-
-function getHtmlInputType(typeFormat) {
-  const [type] = getTypeFormat(typeFormat);
-  if (typeFormat === 'string/password') return 'password';
-  if (type === 'integer') return 'number';
-  if (type === 'timestamp') return 'datetime-local';
-  if (type === 'color') return 'color';
-  return 'text'
-}
-
-function formatInteger(value, format) {
-  const integer = parseInt(value);
-  return isNaN(integer) ? '0' : integer.toString();
-}
-
-function formatTimestamp(value, format) {
-  try {
-    const date = dateFns.parseISO(value);
-    if (format === 'unix-ms') return dateFns.format(date, 'T');
-    if (format === 'iso-8601') return dateFns.formatISO(date);
-    return dateFns.format(date, 't');
-  } catch (e) {
-    console.error(e);
-    return '0';
-  }
-}
-
-function formatValue(value, typeFormat) {
-  const [type, format] = getTypeFormat(typeFormat);
-  if (type === 'timestamp') return formatTimestamp(value, format);
-  if (type === 'integer') return formatInteger(value, format);
-  return value;
-}
-
-function extractParamComponents(spec) {
-  let name = 'Parameter', description = '';
-  const regex = /^\s*(:?\s*[^:]+)(?::(.+))?$/;
-  const matches = spec.match(regex);
-  if (matches) {
-    name = matches[1];
-    description = matches[2] || '';
-  }
-  return [name.trim(), description.trim()];
-}
+const util = require('./util');
 
 module.exports.templateTags = [{
   name: 'param',
@@ -110,7 +62,7 @@ module.exports.templateTags = [{
   }],
 
   async run (context, name, typeFormat, askBehavior, paramOpts) {
-    const [type] = getTypeFormat(typeFormat);
+    const [type] = util.getTypeFormat(typeFormat);
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
     const storageKey = `${context.meta.requestId}.${paramHash}.${type}`;
     const storedValue = await context.store.getItem(storageKey);
@@ -121,8 +73,8 @@ module.exports.templateTags = [{
     } else if (askBehavior === 'ask/stored') {
       defaultValue = storedValue || '';
     }
-    const inputType = getHtmlInputType(typeFormat);
-    const [title, description] = extractParamComponents(name)
+    const inputType = util.getHtmlInputType(typeFormat);
+    const [title, description] = util.extractParamComponents(name)
     const value = await context.app.prompt(title, {
       label: description,
       defaultValue,
@@ -132,6 +84,6 @@ module.exports.templateTags = [{
     if (typeFormat !== 'string/password') {
       await context.store.setItem(storageKey, value);
     }
-    return formatValue(value, typeFormat);
+    return util.formatValue(value, typeFormat);
   }
 }];
