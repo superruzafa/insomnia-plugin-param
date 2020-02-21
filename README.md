@@ -1,5 +1,8 @@
 # insomnia-plugin-param
 
+[![NPM](https://img.shields.io/npm/v/insomnia-plugin-param.svg)](https://www.npmjs.com/package/insomnia-plugin-param)
+[![CircleCI](https://circleci.com/gh/superruzafa/insomnia-plugin-param.svg?style=shield)](https://circleci.com/gh/superruzafa/insomnia-plugin-param)
+
 An [Insomnia] plugin to ask values to the user when making requests.
 
 This plugin works much like the Insomnia's built-in Prompt plugin but adds some
