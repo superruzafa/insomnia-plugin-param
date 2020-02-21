@@ -1,10 +1,12 @@
 {
   "name": "insomnia-plugin-param",
   "version": "0.1.0",
-  "description": "An Insomnia plugin to ask for values for parameterized requests",
+  "description": "An Insomnia plugin to ask values to the user when making requests.",
   "main": "index.js",
   "scripts": {
-    "test": "node --version"
+    "test": "jest",
+    "test:tdd": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "author": {
     "name": "Alfonso Ruzafa",
@@ -13,5 +15,11 @@
   "license": "MIT",
   "insomnia": {
     "name": "param"
+  },
+  "dependencies": {
+    "date-fns": "^2.9.0"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
   }
 }
