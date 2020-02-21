@@ -6,7 +6,7 @@ This plugin works much like the Insomnia's built-in Prompt plugin but adds some
 unique features, like asking for specific data type values or formatting those
 values into several formats.
 
-![Example](./images/example.png)
+![Example](https://raw.githubusercontent.com/superruzafa/insomnia-plugin-param/master/images/example.png)
 
 ## Installation
 
@@ -18,7 +18,7 @@ In the [Insomnia] app go to `Preferences` > `Plugins` and install the
 Use the `Param` template tag in requests URLs, headers and bodies. Then click
 on the tag and customize the parameter with the proper values.
 
-![Param Template Tag](./images/template-tag.png)
+![Param Template Tag](https://raw.githubusercontent.com/superruzafa/insomnia-plugin-param/master/images/template-tag.png)
 
 ## Types:
 
@@ -46,15 +46,15 @@ explanation about the purpose of the parameter.
 
 With no value:
 
-![Without name](./images/param-without-name.png)
+![Without name](https://raw.githubusercontent.com/superruzafa/insomnia-plugin-param/master/images/param-without-name.png)
 
 With `Username`:
 
-![Without name](./images/param-with-name.png)
+![Without name](https://raw.githubusercontent.com/superruzafa/insomnia-plugin-param/master/images/param-with-name.png)
 
 With `Username: Enter here your Github username`:
 
-![Without name](./images/param-with-name-and-desc.png)
+![Without name](https://raw.githubusercontent.com/superruzafa/insomnia-plugin-param/master/images/param-with-name-and-desc.png)
 
 ## Control when the dialog is shown:
 
