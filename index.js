@@ -74,7 +74,7 @@ module.exports.templateTags = [{
       defaultValue = storedValue || '';
     }
     const inputType = util.getHtmlInputType(typeFormat);
-    const [title, description] = util.extractParamComponents(name)
+    const [title, description] = util.getNameDesc(name)
     const value = await context.app.prompt(title, {
       label: description,
       defaultValue,

@@ -7,7 +7,7 @@ const {
   formatInteger,
   formatTimestamp,
   formatValue,
-  extractParamComponents,
+  getNameDesc,
 } = require('../util');
 
 beforeAll(() => {
@@ -190,7 +190,7 @@ describe('#formatValue', () => {
   });
 });
 
-describe('#extractParamComponents', () => {
+describe('#getNameDesc', () => {
   [
     ['', 'Parameter', ''],
     ['param', 'param', ''],
@@ -199,7 +199,7 @@ describe('#extractParamComponents', () => {
   ].forEach(([input, expectedName, expectedDesc]) => {
     describe(`when the input is "${input}"`, () => {
       test(`the name should be "${expectedName}" and the desc. "${expectedDesc}"`, () => {
-        const [name, desc] = extractParamComponents(input);
+        const [name, desc] = getNameDesc(input);
         expect(name).toBe(expectedName);
         expect(desc).toBe(expectedDesc);
       });

@@ -37,7 +37,7 @@ function formatValue(value, typeFormat) {
   return value;
 }
 
-function extractParamComponents(spec) {
+function getNameDesc(spec) {
   let name = 'Parameter', description = '';
   const regex = /^\s*(:?\s*[^:]+)(?::(.+))?$/;
   const matches = spec.match(regex);
@@ -54,5 +54,5 @@ module.exports = {
   formatInteger,
   formatTimestamp,
   formatValue,
-  extractParamComponents,
+  getNameDesc,
 };
