@@ -4,7 +4,9 @@
   "description": "An Insomnia plugin to ask for values for parameterized requests",
   "main": "index.js",
   "scripts": {
-    "test": "node --version"
+    "test": "jest",
+    "test:tdd": "jest --watch",
+    "test:coverage": "jest --coverage"
   },
   "author": {
     "name": "Alfonso Ruzafa",
@@ -16,5 +18,8 @@
   },
   "dependencies": {
     "date-fns": "^2.9.0"
+  },
+  "devDependencies": {
+    "jest": "^25.1.0"
   }
 }
