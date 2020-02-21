@@ -37,13 +37,26 @@ function formatValue(value, typeFormat) {
   return value;
 }
 
+function extractParamComponents(spec) {
+  let name = 'Parameter', description = '';
+  const regex = /^\s*(:?\s*[^:]+)(?::(.+))?$/;
+  const matches = spec.match(regex);
+  if (matches) {
+    name = matches[1];
+    description = matches[2] || '';
+  }
+  return [name.trim(), description.trim()];
+}
+
 module.exports.templateTags = [{
   name: 'param',
   displayName: 'Param',
   description: 'Ask for values for parameterized requests',
   args: [{
     displayName: 'Name',
-    help: 'The name of the parameter',
+    help: 'The name of the parameter.\n' +
+          'Optionally you can include a description with the purpose of this ' +
+          'parameter by using this format: <Name>: <description>',
     type: 'string'
   }, {
     displayName: 'Type',
@@ -75,9 +88,10 @@ module.exports.templateTags = [{
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
     const storageKey = `${context.meta.requestId}.${paramHash}.${type}`;
     const storedValue = await context.store.getItem(storageKey);
-    const title = name || 'Parameter';
     const inputType = getHtmlInputType(typeFormat);
+    const [title, description] = extractParamComponents(name)
     const value = await context.app.prompt(title, {
+      label: description,
       defaultValue: storedValue || '',
       inputType,
       selectText: true
