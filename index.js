@@ -13,17 +13,27 @@ function getHtmlInputType(typeFormat) {
   return 'text'
 }
 
-function formatValue(value, typeFormat) {
-  const [type, format] = getTypeFormat(typeFormat);
-  if (type === 'timestamp') {
+function formatInteger(value, format) {
+  const integer = parseInt(value);
+  return isNaN(integer) ? '0' : integer.toString();
+}
+
+function formatTimestamp(value, format) {
+  try {
     const date = dateFns.parseISO(value);
     if (format === 'unix-ms') return dateFns.format(date, 'T');
     if (format === 'iso-8601') return dateFns.formatISO(date);
     return dateFns.format(date, 't');
+  } catch (e) {
+    console.error(e);
+    return '0';
   }
-  if (type === 'integer') {
-    return parseInt(value);
-  }
+}
+
+function formatValue(value, typeFormat) {
+  const [type, format] = getTypeFormat(typeFormat);
+  if (type === 'timestamp') return formatTimestamp(value, format);
+  if (type === 'integer') return formatInteger(value, format);
   return value;
 }
 
@@ -41,13 +51,13 @@ module.exports.templateTags = [{
     type: 'enum',
     options: [{
       displayName: 'String',
-      value: 'string/raw'
+      value: 'string/string'
     }, {
       displayName: 'String - Password',
       value: 'string/password'
     }, {
       displayName: 'Integer',
-      value: 'integer'
+      value: 'integer/integer'
     }, {
       displayName: 'Timestamp - Unix',
       value: 'timestamp/unix'
@@ -61,8 +71,9 @@ module.exports.templateTags = [{
   }],
 
   async run (context, name, typeFormat) {
+    const [type] = getTypeFormat(typeFormat);
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
-    const storageKey = `${context.meta.requestId}.${paramHash}.${typeFormat}`;
+    const storageKey = `${context.meta.requestId}.${paramHash}.${type}`;
     const storedValue = await context.store.getItem(storageKey);
     const title = name || 'Parameter';
     const inputType = getHtmlInputType(typeFormat);
