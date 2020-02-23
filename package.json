@@ -13,6 +13,7 @@
     "email": "superruzafa@gmail.com"
   },
   "license": "MIT",
+  "repository": "https://github.com/superruzafa/insomnia-plugin-param",
   "insomnia": {
     "name": "param"
   },
