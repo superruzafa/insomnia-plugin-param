@@ -61,7 +61,7 @@ module.exports.templateTags = [{
     type: 'string'
   }],
 
-  async run (context, typeFormat, name, askBehavior, paramOpts) {
+  async run(context, typeFormat, name, askBehavior, paramOpts) {
     const [type] = util.getTypeFormat(typeFormat);
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
     const storageKey = `${context.meta.requestId}.${paramHash}.${type}`;
