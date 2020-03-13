@@ -4,6 +4,7 @@ const util = require('./util');
 module.exports.templateTags = [{
   name: 'param',
   displayName: 'Param',
+  disablePreview: args => args[0].value === 'string/password',
   description: 'Ask for values for parameterized requests',
   args: [{
     displayName: 'Type',
@@ -62,17 +63,29 @@ module.exports.templateTags = [{
   }],
 
   async run(context, typeFormat, name, askBehavior, paramOpts) {
+    const isSensitiveParam = typeFormat === 'string/password'
+      && ['ask/blank', 'ask/default'].includes(askBehavior);
     const [type] = util.getTypeFormat(typeFormat);
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
     const storageKey = `${context.meta.requestId}.${paramHash}.${type}`;
-    const storedValue = await context.store.getItem(storageKey);
-    let defaultValue = '';
+    let storedValue = '';
+    if (isSensitiveParam) {
+      await context.store.removeItem(storageKey);
+    } else {
+      storedValue = await context.store.getItem(storageKey) || '';
+    }
 
-    if (askBehavior === 'once/stored' && storedValue !== '') {
+    if (context.renderPurpose !== 'send') {
+      return storedValue || '';
+    }
+
+    let defaultValue = '';
+    if (askBehavior === 'once/stored' && storedValue) {
       return storedValue;
     } else if (askBehavior === 'ask/stored') {
       defaultValue = storedValue || '';
     }
+
     const inputType = util.getHtmlInputType(typeFormat);
     const [title, description] = util.getNameDesc(name)
     const value = await context.app.prompt(title, {
@@ -81,9 +94,11 @@ module.exports.templateTags = [{
       inputType,
       selectText: true
     });
-    if (typeFormat !== 'string/password') {
+
+    if (!isSensitiveParam) {
       await context.store.setItem(storageKey, value);
     }
+
     return util.formatValue(value, typeFormat);
   }
 }];

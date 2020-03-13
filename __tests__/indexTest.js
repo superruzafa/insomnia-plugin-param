@@ -7,26 +7,29 @@ jest.mock('crypto');
 jest.mock('../util');
 
 function mockContext() {
-  const prompt = jest.fn((title, options) => Promise.resolve('PROMPT_RESULT'));
-  const getItem = jest.fn(storageKey => Promise.resolve('STORED_VALUE'));
+  const prompt = jest.fn((title, options) => Promise.resolve('USERVALUE'));
+  const getItem = jest.fn(storageKey => Promise.resolve('STOREDVALUE'));
   const setItem = jest.fn((storageKey, value) => Promise.resolve(null));
+  const removeItem = jest.fn((storageKey) => Promise.resolve(null));
   const context = {
     app: {
       prompt
     },
     meta: {
-      requestId: 'REQUEST_ID'
+      requestId: 'REQID'
     },
+    renderPurpose: 'send',
     store: {
       getItem,
-      setItem
+      setItem,
+      removeItem,
     }
   };
   return { context, prompt, getItem, setItem };
 }
 
 function mockCrypto() {
-  const digest = jest.fn(() => 'DIGEST_RESULT');
+  const digest = jest.fn(() => 'HASH');
   const update = jest.fn(() => ({ digest }));
   const createHash = jest.fn(() => ({ update }));
   crypto.createHash = createHash;
@@ -34,236 +37,204 @@ function mockCrypto() {
 }
 
 function mockUtil() {
-  util.getTypeFormat = jest.fn(() => ['PARAM_TYPE', 'PARAM_FORMAT']);
-  util.getHtmlInputType = jest.fn(() => 'INPUT_TYPE');
-  util.getNameDesc = jest.fn(() => ['PARAM_NAME', 'DESCRIPTION']);
-  util.formatValue = jest.fn(() => 'FORMATTED_VALUE');
+  util.getTypeFormat = jest.fn(() => ['TYPE', 'FORMAT']);
+  util.getHtmlInputType = jest.fn(() => 'HTMLTYPE');
+  util.getNameDesc = jest.fn(() => ['NAME', 'DESC']);
+  util.formatValue = jest.fn(() => 'FMTVALUE');
   return util;
 }
 
-describe('when there is not a stored value', () => {
-  describe('when the ask behaviour is ask/blank', () => {
+describe('when type/format is string/password', () => {
+  describe('when ask behavior is ask/blank', () => {
     test('', async () => {
-      const { update, digest } = mockCrypto();
-      const { context } = mockContext();
+      mockCrypto();
       mockUtil();
-      context.store.getItem.mockImplementation(() => Promise.resolve(''));
-
-      const value = await run(context, 'TYPE/FORMAT', 'PARAM_NAME', 'ask/blank', '');
-      expect(value).toBe('FORMATTED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
-      expect(util.getHtmlInputType).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(context.app.prompt).toHaveBeenCalledWith('PARAM_NAME', {
-        label: 'DESCRIPTION',
-        defaultValue: '',
-        inputType: 'INPUT_TYPE',
-        selectText: true
-      });
-      expect(context.store.setItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE', 'PROMPT_RESULT');
-      expect(util.formatValue).toHaveBeenCalledWith('PROMPT_RESULT', 'TYPE/FORMAT');
-    });
-  });
-
-  describe('when the ask behaviour is ask/stored', () => {
-    test('', async () => {
-      const { update, digest } = mockCrypto();
       const { context } = mockContext();
-      mockUtil();
-      context.store.getItem.mockImplementation(() => Promise.resolve(''));
-
-      const value = await run(context, 'TYPE/FORMAT', 'PARAM_NAME', 'ask/stored', '');
-      expect(value).toBe('FORMATTED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
-      expect(util.getHtmlInputType).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(context.app.prompt).toHaveBeenCalledWith('PARAM_NAME', {
-        label: 'DESCRIPTION',
-        defaultValue: '',
-        inputType: 'INPUT_TYPE',
-        selectText: true
-      });
-      expect(context.store.setItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE', 'PROMPT_RESULT');
-      expect(util.formatValue).toHaveBeenCalledWith('PROMPT_RESULT', 'TYPE/FORMAT');
-    });
-  });
-
-  describe('when the ask behaviour is ask/default', () => {
-    test('', async () => {
-      const { update, digest } = mockCrypto();
-      const { context } = mockContext();
-      mockUtil();
-      context.store.getItem.mockImplementation(() => Promise.resolve(''));
-
-      const value = await run(context, 'TYPE/FORMAT', 'PARAM_NAME', 'ask/default', '');
-      expect(value).toBe('FORMATTED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
-      expect(util.getHtmlInputType).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(context.app.prompt).toHaveBeenCalledWith('PARAM_NAME', {
-        label: 'DESCRIPTION',
-        defaultValue: '',
-        inputType: 'INPUT_TYPE',
-        selectText: true
-      });
-      expect(context.store.setItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE', 'PROMPT_RESULT');
-      expect(util.formatValue).toHaveBeenCalledWith('PROMPT_RESULT', 'TYPE/FORMAT');
-    });
-  });
-
-  describe('when the ask behaviour is once/stored', () => {
-    test('the stored value should be returned without shown the prompt', async () => {
-      const { update, digest } = mockCrypto();
-      const { context } = mockContext();
-      mockUtil();
-      context.store.getItem.mockImplementation(() => Promise.resolve(''));
-
-      const value = await run(context, 'TYPE/FORMAT', 'PARAM_NAME', 'once/stored', '');
-      expect(value).toBe('FORMATTED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
-      expect(context.app.prompt).toHaveBeenCalledWith('PARAM_NAME', {
-        label: 'DESCRIPTION',
-        defaultValue: '',
-        inputType: 'INPUT_TYPE',
-        selectText: true
-      });
-      expect(context.store.setItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE', 'PROMPT_RESULT');
-      expect(util.formatValue).toHaveBeenCalledWith('PROMPT_RESULT', 'TYPE/FORMAT');
-    });
-  });
-
-  describe('when the type/format is string/password', () => {
-    test('the stored value should be returned without shown the prompt', async () => {
-      const { update, digest } = mockCrypto();
-      const { context } = mockContext();
-      mockUtil();
-      context.store.getItem.mockImplementation(() => Promise.resolve(''));
-
-      const value = await run(context, 'string/password', 'PARAM_NAME', 'ask/always', '');
-      expect(value).toBe('FORMATTED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('string/password');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
-      expect(context.app.prompt).toHaveBeenCalledWith('PARAM_NAME', {
-        label: 'DESCRIPTION',
-        defaultValue: '',
-        inputType: 'INPUT_TYPE',
-        selectText: true
-      });
+      const result = await run(context, 'string/password', 'NAME', 'ask/blank', {});
+      expect(result).toBe('FMTVALUE');
+      expect(context.app.prompt).toHaveBeenCalled();
+      expect(context.store.removeItem).toHaveBeenCalledWith('REQID.HASH.TYPE');
       expect(context.store.setItem).not.toHaveBeenCalled();
-      expect(util.formatValue).toHaveBeenCalledWith('PROMPT_RESULT', 'string/password');
+    });
+  });
+  describe('when ask behavior is ask/default', () => {
+    test('', async () => {
+      mockCrypto();
+      mockUtil();
+      const { context } = mockContext();
+      const result = await run(context, 'string/password', 'NAME', 'ask/default', {});
+      expect(result).toBe('FMTVALUE');
+      expect(context.app.prompt).toHaveBeenCalled();
+      expect(context.store.removeItem).toHaveBeenCalledWith('REQID.HASH.TYPE');
+      expect(context.store.setItem).not.toHaveBeenCalled();
+    });
+  });
+  describe('when ask behavior is ask/stored', () => {
+    describe('when there is not a stored value', () => {
+      test('', async () => {
+        mockCrypto();
+        mockUtil();
+        const { context } = mockContext();
+        context.store.getItem.mockImplementation(() => null);
+
+        const result = await run(context, 'string/password', 'NAME', 'ask/stored', {});
+        expect(result).toBe('FMTVALUE');
+        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+        expect(context.store.removeItem).not.toHaveBeenCalled();
+        expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
+      });
+    });
+    describe('when there is a stored value', () => {
+      test('', async () => {
+        mockCrypto();
+        mockUtil();
+        const { context } = mockContext();
+        const result = await run(context, 'string/password', 'NAME', 'ask/stored', {});
+        expect(result).toBe('FMTVALUE');
+        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('STOREDVALUE');
+        expect(context.store.removeItem).not.toHaveBeenCalled();
+        expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
+      });
+    });
+  });
+  describe('when ask behavior is once/stored', () => {
+    describe('when there is not a stored value', () => {
+      test('', async () => {
+        mockCrypto();
+        mockUtil();
+        const { context } = mockContext();
+        context.store.getItem.mockImplementation(() => null);
+
+        const result = await run(context, 'string/password', 'NAME', 'once/stored', {});
+        expect(result).toBe('FMTVALUE');
+        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+        expect(context.store.removeItem).not.toHaveBeenCalled();
+        expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
+      });
+    });
+    describe('when there is a stored value', () => {
+      test('', async () => {
+        mockCrypto();
+        mockUtil();
+        const { context } = mockContext();
+        const result = await run(context, 'string/password', 'NAME', 'once/stored', {});
+        expect(result).toBe('STOREDVALUE');
+        expect(context.app.prompt).not.toHaveBeenCalled();
+        expect(context.store.removeItem).not.toHaveBeenCalled();
+        expect(context.store.setItem).not.toHaveBeenCalled();
+      });
     });
   });
 });
 
-describe('when there is a stored value', () => {
-  describe('when the ask behaviour is ask/blank', () => {
-    test('', async () => {
-      const { update, digest } = mockCrypto();
-      const { context } = mockContext();
-      mockUtil();
-      context.store.getItem.mockImplementation(() => Promise.resolve('STORED_VALUE'));
+describe('when ask behavior is ask/blank', () => {
+  test('', async () => {
+    mockCrypto();
+    mockUtil();
+    const { context } = mockContext();
+    const result = await run(context, 'TYPEFORMAT', 'NAME', 'ask/blank', {});
+    expect(result).toBe('FMTVALUE');
+    expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+    expect(context.store.removeItem).not.toHaveBeenCalled();
+    expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
+  });
+});
 
-      const value = await run(context, 'TYPE/FORMAT', 'PARAM_NAME', 'ask/blank', '');
-      expect(value).toBe('FORMATTED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
-      expect(util.getHtmlInputType).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(context.app.prompt).toHaveBeenCalledWith('PARAM_NAME', {
-        label: 'DESCRIPTION',
-        defaultValue: '',
-        inputType: 'INPUT_TYPE',
-        selectText: true
-      });
-      expect(context.store.setItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE', 'PROMPT_RESULT');
-      expect(util.formatValue).toHaveBeenCalledWith('PROMPT_RESULT', 'TYPE/FORMAT');
+describe('when ask behavior is ask/default', () => {
+  test('', async () => {
+    mockCrypto();
+    mockUtil();
+    const { context } = mockContext();
+    const result = await run(context, 'TYPEFORMAT', 'NAME', 'ask/blank', {});
+    expect(result).toBe('FMTVALUE');
+    expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+    expect(context.store.removeItem).not.toHaveBeenCalled();
+    expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
+  });
+});
+
+describe('when ask behavior is ask/stored', () => {
+  describe('when there is a stored value', () => {
+    test('', async () => {
+      mockCrypto();
+      mockUtil();
+      const { context } = mockContext();
+      const result = await run(context, 'TYPEFORMAT', 'NAME', 'ask/stored', {});
+      expect(result).toBe('FMTVALUE');
+      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('STOREDVALUE');
+      expect(context.store.removeItem).not.toHaveBeenCalled();
+      expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
     });
   });
-
-  describe('when the ask behaviour is ask/stored', () => {
+  describe('when there is not a stored value', () => {
     test('', async () => {
-      const { update, digest } = mockCrypto();
-      const { context } = mockContext();
+      mockCrypto();
       mockUtil();
-      context.store.getItem.mockImplementation(() => Promise.resolve('STORED_VALUE'));
-
-      const value = await run(context, 'TYPE/FORMAT', 'PARAM_NAME', 'ask/stored', '');
-      expect(value).toBe('FORMATTED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
-      expect(context.app.prompt).toHaveBeenCalledWith('PARAM_NAME', {
-        label: 'DESCRIPTION',
-        defaultValue: 'STORED_VALUE',
-        inputType: 'INPUT_TYPE',
-        selectText: true
-      });
-      expect(context.store.setItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE', 'PROMPT_RESULT');
-      expect(util.formatValue).toHaveBeenCalledWith('PROMPT_RESULT', 'TYPE/FORMAT');
+      const { context } = mockContext();
+      context.store.getItem.mockImplementation(() => null);
+      const result = await run(context, 'TYPEFORMAT', 'NAME', 'ask/stored', {});
+      expect(result).toBe('FMTVALUE');
+      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+      expect(context.store.removeItem).not.toHaveBeenCalled();
+      expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
     });
   });
-  describe('when the ask behaviour is ask/default', () => {
+});
+
+describe('when ask behavior is once/stored', () => {
+  describe('when there is a stored value', () => {
     test('', async () => {
-      const { update, digest } = mockCrypto();
-      const { context } = mockContext();
+      mockCrypto();
       mockUtil();
-      context.store.getItem.mockImplementation(() => Promise.resolve('STORED_VALUE'));
-
-      const value = await run(context, 'TYPE/FORMAT', 'PARAM_NAME', 'ask/default', '');
-      expect(value).toBe('FORMATTED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
-      expect(context.app.prompt).toHaveBeenCalledWith('PARAM_NAME', {
-        label: 'DESCRIPTION',
-        defaultValue: '',
-        inputType: 'INPUT_TYPE',
-        selectText: true
-      });
-      expect(context.store.setItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE', 'PROMPT_RESULT');
-      expect(util.formatValue).toHaveBeenCalledWith('PROMPT_RESULT', 'TYPE/FORMAT');
-    });
-  });
-  describe('when the ask behaviour is once/stored', () => {
-    test('the stored value should be returned without shown the prompt', async () => {
-      const { update, digest } = mockCrypto();
       const { context } = mockContext();
-      mockUtil();
-
-      context.store.getItem.mockImplementation(() => Promise.resolve('STORED_VALUE'));
-      const value = await run(context, 'TYPE/FORMAT', 'PARAM_NAME', 'once/stored', '');
-      expect(value).toBe('STORED_VALUE');
-      expect(util.getTypeFormat).toHaveBeenCalledWith('TYPE/FORMAT');
-      expect(crypto.createHash).toHaveBeenCalledWith('md5');
-      expect(update).toHaveBeenCalledWith('PARAM_NAME');
-      expect(digest).toHaveBeenCalledWith('hex');
-      expect(context.store.getItem).toHaveBeenCalledWith('REQUEST_ID.DIGEST_RESULT.PARAM_TYPE')
+      const result = await run(context, 'TYPEFORMAT', 'NAME', 'once/stored', {});
+      expect(result).toBe('STOREDVALUE');
       expect(context.app.prompt).not.toHaveBeenCalled();
-      expect(context.store.setItem).not.toHaveBeenCalled();
-      expect(util.formatValue).not.toHaveBeenCalled();
+      expect(context.store.removeItem).not.toHaveBeenCalled();
+      expect(context.store.setItem).not.toHaveBeenCalledWith();
+    });
+  });
+  describe('when there is not a stored value', () => {
+    test('', async () => {
+      mockCrypto();
+      mockUtil();
+      const { context } = mockContext();
+      context.store.getItem.mockImplementation(() => null);
+      const result = await run(context, 'TYPEFORMAT', 'NAME', 'once/stored', {});
+      expect(result).toBe('FMTVALUE');
+      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+      expect(context.store.removeItem).not.toHaveBeenCalled();
+      expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
     });
   });
 });
 
+// describe('when the render purpose is to preview', () => {
+//   describe('when the typeFormat is string/password', () => {
+//     test('', async () => {
+//       mockCrypto();
+//       mockUtil();
+//       const { context } = mockContext();
+//       context.renderPurpose = '';
+//       context.store.getItem.mockImplementation(() => 'S3CR3T');
+//       const result = await run(context, 'string/password', 'NAME', 'once/stored', {});
+//       expect(result).toBe('******');
+//       expect(context.app.prompt).not.toHaveBeenCalled();
+//       expect(context.store.removeItem).not.toHaveBeenCalled();
+//       expect(context.store.setItem).not.toHaveBeenCalled();
+//     });
+//   });
+//   describe('when the typeFormat is not string/password', () => {
+//     test('', async () => {
+//       mockCrypto();
+//       mockUtil();
+//       const { context } = mockContext();
+//       context.renderPurpose = '';
+//       const result = await run(context, 'TYPEFORMAT', 'NAME', 'once/stored', {});
+//       expect(result).toBe('STOREDVALUE');
+//       expect(context.app.prompt).not.toHaveBeenCalled();
+//       expect(context.store.removeItem).not.toHaveBeenCalled();
+//       expect(context.store.setItem).not.toHaveBeenCalled();
+//     });
+//   });
+// });
