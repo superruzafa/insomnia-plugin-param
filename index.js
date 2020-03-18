@@ -1,6 +1,36 @@
 const crypto = require('crypto');
 const util = require('./util');
 
+const availableTypeFormats = [{
+  typeFormat: 'string/string',
+  displayName: 'String',
+  emoji: '🔤'
+}, {
+  typeFormat: 'string/password',
+  displayName: 'Password',
+  emoji: '*️⃣'
+}, {
+  typeFormat: 'number/integer',
+  displayName: 'Integer',
+  emoji: '🔢'
+}, {
+  typeFormat: 'timestamp/unix',
+  displayName: 'Unix timestamp',
+  emoji: '📅'
+}, {
+  typeFormat: 'timestamp/unix-ms',
+  displayName: 'Unix timestamp with milliseconds',
+  emoji: '📅'
+}, {
+  typeFormat: 'timestamp/ISO-8601',
+  displayName: 'ISO-8601',
+  emoji: '📅'
+}, {
+  typeFormat: 'color/html',
+  displayName: 'HTML Color',
+  emoji: '🖍'
+}];
+
 module.exports.templateTags = [{
   name: 'param',
   displayName: 'Param',
@@ -10,28 +40,10 @@ module.exports.templateTags = [{
     displayName: 'Type',
     help: 'The type and format of the parameter',
     type: 'enum',
-    options: [{
-      displayName: 'String',
-      value: 'string/string'
-    }, {
-      displayName: 'String - Password',
-      value: 'string/password'
-    }, {
-      displayName: 'Integer',
-      value: 'integer/integer'
-    }, {
-      displayName: 'Timestamp - Unix',
-      value: 'timestamp/unix'
-    }, {
-      displayName: 'Timestamp - Unix with milliseconds',
-      value: 'timestamp/unix-ms'
-    }, {
-      displayName: 'Timestamp - ISO-8601',
-      value: 'timestamp/iso-8601'
-    }, {
-      displayName: 'Color - HTML',
-      value: 'color/html'
-    }]
+    options: availableTypeFormats.map(tf => ({
+      displayName: `${tf.emoji} ${tf.displayName}`,
+      value: tf.typeFormat
+    })),
   }, {
     displayName: 'Name',
     help: 'The name of the parameter.\n' +
