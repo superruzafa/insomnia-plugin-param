@@ -13,7 +13,9 @@ values into several formats.
 
 ## Installation
 
-In the [Insomnia] app go to `Preferences` > `Plugins` and install the
+Go to the [Param plugin page] at the [Plugin Hub] and install the plugin from there.
+
+Additionally, in the [Insomnia] app go to `Preferences` > `Plugins` and install the
 `insomnia-plugin-param`.
 
 ## Usage
@@ -25,18 +27,19 @@ on the tag and customize the parameter with the proper values.
 
 ## Types:
 
-- `String`, accepts raw strings
-- `String - Password`, same as previous but masking the input
-- `Integer`, accepts raw integers
-- `Timestamp - Unix timestamp`, ask for timestamps and renders them as the
+- `🔤 String`, accepts raw strings
+- `*️⃣ Password`, same as previous but masking the input
+- `🔢 Integer`, accepts raw integers
+- `☑️ Boolean`, accepts boolean values
+- `📅 Unix timestamp`, ask for timestamps and renders them as the
    number of seconds since the January 1st, 1970.
-- `Timestamp - Unix timestamp with milliseconds`, same as above but including milliseconds.
-- `Timestamp - ISO-8601`, same as above but format timestamps using the
+- `📅 Unix timestamp with milliseconds`, same as above but including milliseconds.
+- `📅 ISO-8601`, same as above but format timestamps using the
    ISO-8601 standard.
-- `Color - HTML`, ask for colors and render the value using the HTML `#RRGGBB`
+- `🔗 URL`, accepts strings that are URLs
+- `✉️ e-mail`, accepts e-Mail addresses
+- `🖍 HTML Color`, accepts colors and renders the value using the HTML `#RRGGBB`
   color format.
-
-More types to come...
 
 ## Name and description
 
@@ -75,3 +78,5 @@ With `Username: Enter here your Github username`:
 To be implemented
 
 [Insomnia]: https://insomnia.rest
+[Param plugin page]: https://insomnia.rest/plugins/insomnia-plugin-param
+[Plugin Hub]: https://insomnia.rest/plugins

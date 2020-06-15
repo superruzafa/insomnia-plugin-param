@@ -62,10 +62,24 @@ describe('#getHtmlInputTypeFormat', () => {
     });
   });
 
+  describe('when the type is string/url', () => {
+    test('the html input type should be "password"', () => {
+      const format = getHtmlInputType('string/url');
+      expect(format).toBe('url');
+    });
+  });
+
+  describe('when the type is string/email', () => {
+    test('the html input type should be "password"', () => {
+      const format = getHtmlInputType('string/email');
+      expect(format).toBe('email');
+    });
+  });
+
   [
-    'integer',
-    'integer/unknown',
-    'integer/integer',
+    'number',
+    'number/unknown',
+    'number/integer',
   ].forEach(type => describe(`when typeFormat is ${type}`, () => {
     test('the html input type should be "number"', () => {
       const format = getHtmlInputType(type);

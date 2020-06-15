@@ -8,13 +8,16 @@ function getTypeFormat(typeFormat) {
 function getHtmlInputType(typeFormat) {
   const [type] = getTypeFormat(typeFormat);
   if (typeFormat === 'string/password') return 'password';
-  if (type === 'integer') return 'number';
+  if (typeFormat === 'string/url') return 'url';
+  if (typeFormat === 'string/email') return 'email';
+  if (type === 'number') return 'number';
+  if (type === 'boolean') return 'checkbox';
   if (type === 'timestamp') return 'datetime-local';
   if (type === 'color') return 'color';
   return 'text'
 }
 
-function formatInteger(value, format) {
+function formatInteger(value) {
   const integer = parseInt(value);
   return isNaN(integer) ? '0' : integer.toString();
 }
@@ -33,7 +36,14 @@ function formatTimestamp(value, format) {
 function formatValue(value, typeFormat) {
   const [type, format] = getTypeFormat(typeFormat);
   if (type === 'timestamp') return formatTimestamp(value, format);
-  if (type === 'integer') return formatInteger(value, format);
+  if (typeFormat === 'number/integer') return formatInteger(value);
+  return value;
+}
+
+function unstringifyValue(value, typeFormat) {
+  const [type] = getTypeFormat(typeFormat);
+  if (type === 'boolean') return 'true' === value;
+  if (typeFormat === 'number/integer') return parseInt(formatInteger(value));
   return value;
 }
 
@@ -51,8 +61,9 @@ function getNameDesc(spec) {
 module.exports = {
   getTypeFormat,
   getHtmlInputType,
-  formatInteger,
   formatTimestamp,
+  formatInteger,
   formatValue,
+  unstringifyValue,
   getNameDesc,
 };

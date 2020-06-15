@@ -1,36 +1,65 @@
 const crypto = require('crypto');
 const util = require('./util');
 
+const availableTypeFormats = [{
+  typeFormat: 'string/string',
+  displayName: 'String',
+  emoji: '🔤'
+}, {
+  typeFormat: 'string/password',
+  displayName: 'Password',
+  emoji: '*️⃣'
+}, {
+  typeFormat: 'number/integer',
+  displayName: 'Integer',
+  emoji: '🔢'
+}, {
+  typeFormat: 'boolean/boolean',
+  displayName: 'Boolean',
+  emoji: '☑️'
+}, {
+  typeFormat: 'timestamp/unix',
+  displayName: 'Unix timestamp',
+  emoji: '📅'
+}, {
+  typeFormat: 'timestamp/unix-ms',
+  displayName: 'Unix timestamp with milliseconds',
+  emoji: '📅'
+}, {
+  typeFormat: 'timestamp/ISO-8601',
+  displayName: 'ISO-8601',
+  emoji: '📅'
+}, {
+  typeFormat: 'string/url',
+  displayName: 'URL',
+  emoji: '🔗'
+}, {
+  typeFormat: 'string/email',
+  displayName: 'e-mail',
+  emoji: '✉️'
+}, {
+  typeFormat: 'color/html',
+  displayName: 'HTML Color',
+  emoji: '🖍'
+}];
+
 module.exports.templateTags = [{
   name: 'param',
   displayName: 'Param',
+  liveDisplayName: args => {
+    const [name] = util.getNameDesc(args[1].value);
+    return name;
+  },
+  disablePreview: args => args[0].value === 'string/password',
   description: 'Ask for values for parameterized requests',
   args: [{
     displayName: 'Type',
     help: 'The type and format of the parameter',
     type: 'enum',
-    options: [{
-      displayName: 'String',
-      value: 'string/string'
-    }, {
-      displayName: 'String - Password',
-      value: 'string/password'
-    }, {
-      displayName: 'Integer',
-      value: 'integer/integer'
-    }, {
-      displayName: 'Timestamp - Unix',
-      value: 'timestamp/unix'
-    }, {
-      displayName: 'Timestamp - Unix with milliseconds',
-      value: 'timestamp/unix-ms'
-    }, {
-      displayName: 'Timestamp - ISO-8601',
-      value: 'timestamp/iso-8601'
-    }, {
-      displayName: 'Color - HTML',
-      value: 'color/html'
-    }]
+    options: availableTypeFormats.map(tf => ({
+      displayName: `${tf.emoji} ${tf.displayName}`,
+      value: tf.typeFormat
+    })),
   }, {
     displayName: 'Name',
     help: 'The name of the parameter.\n' +
@@ -62,17 +91,30 @@ module.exports.templateTags = [{
   }],
 
   async run(context, typeFormat, name, askBehavior, paramOpts) {
+    const isSensitiveParam = typeFormat === 'string/password'
+      && ['ask/blank', 'ask/default'].includes(askBehavior);
     const [type] = util.getTypeFormat(typeFormat);
     const paramHash = crypto.createHash('md5').update(name).digest('hex');
     const storageKey = `${context.meta.requestId}.${paramHash}.${type}`;
-    const storedValue = await context.store.getItem(storageKey);
-    let defaultValue = '';
+    let storedValue = '';
+    if (isSensitiveParam) {
+      await context.store.removeItem(storageKey);
+    } else {
+      storedValue = await context.store.getItem(storageKey) || '';
+    }
 
-    if (askBehavior === 'once/stored' && storedValue !== '') {
+    if (context.renderPurpose !== 'send') {
+      return storedValue || '';
+    }
+
+    let defaultValue = '';
+    if (askBehavior === 'once/stored' && storedValue) {
       return storedValue;
     } else if (askBehavior === 'ask/stored') {
       defaultValue = storedValue || '';
     }
+    defaultValue = util.unstringifyValue(defaultValue, typeFormat);
+
     const inputType = util.getHtmlInputType(typeFormat);
     const [title, description] = util.getNameDesc(name)
     const value = await context.app.prompt(title, {
@@ -81,9 +123,11 @@ module.exports.templateTags = [{
       inputType,
       selectText: true
     });
-    if (typeFormat !== 'string/password') {
+
+    if (!isSensitiveParam) {
       await context.store.setItem(storageKey, value);
     }
+
     return util.formatValue(value, typeFormat);
   }
 }];
