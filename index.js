@@ -30,6 +30,14 @@ const availableTypeFormats = [{
   displayName: 'ISO-8601',
   emoji: '📅'
 }, {
+  typeFormat: 'string/url',
+  displayName: 'URL',
+  emoji: '🔗'
+}, {
+  typeFormat: 'string/email',
+  displayName: 'e-mail',
+  emoji: '✉️'
+}, {
   typeFormat: 'color/html',
   displayName: 'HTML Color',
   emoji: '🖍'

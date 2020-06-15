@@ -8,6 +8,8 @@ function getTypeFormat(typeFormat) {
 function getHtmlInputType(typeFormat) {
   const [type] = getTypeFormat(typeFormat);
   if (typeFormat === 'string/password') return 'password';
+  if (typeFormat === 'string/url') return 'url';
+  if (typeFormat === 'string/email') return 'email';
   if (type === 'number') return 'number';
   if (type === 'boolean') return 'checkbox';
   if (type === 'timestamp') return 'datetime-local';
