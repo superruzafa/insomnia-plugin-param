@@ -34,6 +34,10 @@ const availableTypeFormats = [{
 module.exports.templateTags = [{
   name: 'param',
   displayName: 'Param',
+  liveDisplayName: args => {
+    const [name] = util.getNameDesc(args[1].value);
+    return name;
+  },
   disablePreview: args => args[0].value === 'string/password',
   description: 'Ask for values for parameterized requests',
   args: [{
