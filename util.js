@@ -9,6 +9,7 @@ function getHtmlInputType(typeFormat) {
   const [type] = getTypeFormat(typeFormat);
   if (typeFormat === 'string/password') return 'password';
   if (type === 'number') return 'number';
+  if (type === 'boolean') return 'checkbox';
   if (type === 'timestamp') return 'datetime-local';
   if (type === 'color') return 'color';
   return 'text'
@@ -39,6 +40,7 @@ function formatValue(value, typeFormat) {
 
 function unstringifyValue(value, typeFormat) {
   const [type] = getTypeFormat(typeFormat);
+  if (type === 'boolean') return 'true' === value;
   if (typeFormat === 'number/integer') return parseInt(formatInteger(value));
   return value;
 }

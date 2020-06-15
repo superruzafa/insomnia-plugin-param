@@ -14,6 +14,10 @@ const availableTypeFormats = [{
   displayName: 'Integer',
   emoji: '🔢'
 }, {
+  typeFormat: 'boolean/boolean',
+  displayName: 'Boolean',
+  emoji: '☑️'
+}, {
   typeFormat: 'timestamp/unix',
   displayName: 'Unix timestamp',
   emoji: '📅'
