@@ -41,6 +41,7 @@ function mockUtil() {
   util.getHtmlInputType = jest.fn(() => 'HTMLTYPE');
   util.getNameDesc = jest.fn(() => ['NAME', 'DESC']);
   util.formatValue = jest.fn(() => 'FMTVALUE');
+  util.unstringifyValue = jest.fn(() => 'DEFAULTVALUE');
   return util;
 }
 
@@ -79,7 +80,8 @@ describe('when type/format is string/password', () => {
 
         const result = await run(context, 'string/password', 'NAME', 'ask/stored', {});
         expect(result).toBe('FMTVALUE');
-        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+        expect(util.unstringifyValue).toHaveBeenCalledWith('', 'string/password');
+        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('DEFAULTVALUE');
         expect(context.store.removeItem).not.toHaveBeenCalled();
         expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
       });
@@ -91,7 +93,8 @@ describe('when type/format is string/password', () => {
         const { context } = mockContext();
         const result = await run(context, 'string/password', 'NAME', 'ask/stored', {});
         expect(result).toBe('FMTVALUE');
-        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('STOREDVALUE');
+        expect(util.unstringifyValue).toHaveBeenCalledWith('STOREDVALUE', 'string/password');
+        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('DEFAULTVALUE');
         expect(context.store.removeItem).not.toHaveBeenCalled();
         expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
       });
@@ -107,7 +110,8 @@ describe('when type/format is string/password', () => {
 
         const result = await run(context, 'string/password', 'NAME', 'once/stored', {});
         expect(result).toBe('FMTVALUE');
-        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+        expect(util.unstringifyValue).toHaveBeenCalledWith('', 'string/password');
+        expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('DEFAULTVALUE');
         expect(context.store.removeItem).not.toHaveBeenCalled();
         expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
       });
@@ -134,7 +138,7 @@ describe('when ask behavior is ask/blank', () => {
     const { context } = mockContext();
     const result = await run(context, 'TYPEFORMAT', 'NAME', 'ask/blank', {});
     expect(result).toBe('FMTVALUE');
-    expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+    expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('DEFAULTVALUE');
     expect(context.store.removeItem).not.toHaveBeenCalled();
     expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
   });
@@ -147,7 +151,7 @@ describe('when ask behavior is ask/default', () => {
     const { context } = mockContext();
     const result = await run(context, 'TYPEFORMAT', 'NAME', 'ask/blank', {});
     expect(result).toBe('FMTVALUE');
-    expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+    expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('DEFAULTVALUE');
     expect(context.store.removeItem).not.toHaveBeenCalled();
     expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
   });
@@ -157,11 +161,12 @@ describe('when ask behavior is ask/stored', () => {
   describe('when there is a stored value', () => {
     test('', async () => {
       mockCrypto();
-      mockUtil();
+      const util = mockUtil();
       const { context } = mockContext();
       const result = await run(context, 'TYPEFORMAT', 'NAME', 'ask/stored', {});
       expect(result).toBe('FMTVALUE');
-      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('STOREDVALUE');
+      expect(util.unstringifyValue).toHaveBeenCalledWith('STOREDVALUE', 'TYPEFORMAT');
+      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('DEFAULTVALUE');
       expect(context.store.removeItem).not.toHaveBeenCalled();
       expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
     });
@@ -169,12 +174,13 @@ describe('when ask behavior is ask/stored', () => {
   describe('when there is not a stored value', () => {
     test('', async () => {
       mockCrypto();
-      mockUtil();
+      const util = mockUtil();
       const { context } = mockContext();
       context.store.getItem.mockImplementation(() => null);
       const result = await run(context, 'TYPEFORMAT', 'NAME', 'ask/stored', {});
       expect(result).toBe('FMTVALUE');
-      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+      expect(util.unstringifyValue).toHaveBeenCalledWith('', 'TYPEFORMAT');
+      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('DEFAULTVALUE');
       expect(context.store.removeItem).not.toHaveBeenCalled();
       expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
     });
@@ -202,7 +208,7 @@ describe('when ask behavior is once/stored', () => {
       context.store.getItem.mockImplementation(() => null);
       const result = await run(context, 'TYPEFORMAT', 'NAME', 'once/stored', {});
       expect(result).toBe('FMTVALUE');
-      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('');
+      expect(context.app.prompt.mock.calls[0][1].defaultValue).toBe('DEFAULTVALUE');
       expect(context.store.removeItem).not.toHaveBeenCalled();
       expect(context.store.setItem).toHaveBeenCalledWith('REQID.HASH.TYPE', 'USERVALUE');
     });

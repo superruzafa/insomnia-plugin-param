@@ -61,6 +61,8 @@ function getNameDesc(spec) {
 module.exports = {
   getTypeFormat,
   getHtmlInputType,
+  formatTimestamp,
+  formatInteger,
   formatValue,
   unstringifyValue,
   getNameDesc,
