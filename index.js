@@ -101,6 +101,7 @@ module.exports.templateTags = [{
     } else if (askBehavior === 'ask/stored') {
       defaultValue = storedValue || '';
     }
+    defaultValue = util.unstringifyValue(defaultValue, typeFormat);
 
     const inputType = util.getHtmlInputType(typeFormat);
     const [title, description] = util.getNameDesc(name)
