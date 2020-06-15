@@ -1,7 +1,7 @@
 {
   "name": "insomnia-plugin-param",
   "version": "0.2.0",
-  "description": "An Insomnia plugin to parameterize requests",
+  "description": "Parameterize requests and prompt for values",
   "main": "index.js",
   "scripts": {
     "test": "jest",
